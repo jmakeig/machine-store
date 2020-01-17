@@ -1,6 +1,7 @@
+import replace from 'rollup-plugin-replace';
 import svelte from 'rollup-plugin-svelte';
-import resolve from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
+import resolve from 'rollup-plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 
@@ -15,6 +16,12 @@ export default {
     file: 'public/build/bundle.js'
   },
   plugins: [
+    // https://github.com/davidkpiano/xstate/issues/787#issuecomment-553599685
+    replace({
+      'process.env.NODE_ENV': production
+        ? JSON.stringify('production')
+        : JSON.stringify('development')
+    }),
     svelte({
       // enable run-time checks when not in production
       dev: !production,
@@ -29,7 +36,7 @@ export default {
     // npm, you'll most likely need these plugins. In
     // some cases you'll need additional configuration —
     // consult the documentation for details:
-    // https://github.com/rollup/plugins/tree/master/packages/commonjs
+    // https://github.com/rollup/rollup-plugin-commonjs
     resolve({
       browser: true,
       dedupe: importee =>
