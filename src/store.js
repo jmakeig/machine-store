@@ -1,8 +1,9 @@
 import { writable, readable } from 'svelte/store';
-import { Machine, interpret } from 'xstate';
+import { Machine, interpret, assign } from 'xstate';
 
-const machine = Machine({
+const itemMachine = Machine({
 	id: 'item',
+	strict: true,
 	initial: 'unselected',
 	context: {
 		item: null
@@ -20,30 +21,59 @@ const machine = Machine({
 		}
 	}
 });
-
-export function ItemStore(item) {
-	const service = interpret(machine.withContext({ ...machine.context, item }));
+function useMachine(machine, context, selector = c => c) {
+	// console.log(machine.context, context, { ...machine.context, ...context });
+	const service = interpret(
+		machine.withContext({ ...machine.context, ...context })
+	);
 	const store = readable(machine.initialState, set => {
 		service.onTransition(state => {
-			if (state.changed) {
-				set(state);
+			console.log('trans', state);
+			if (undefined === state.changed || true === state.changed) {
+				set({ state, context: selector(state.context) });
 			}
 		});
 		service.start();
 		return () => service.stop();
 	});
 	return {
-		state: store,
+		store,
 		dispatch: service.send
 	};
 }
 
-export function CollectionStore() {
-	const store = writable([]);
-	return {
-		state: store,
-		add(item) {
-			store.update(items => [...items, ItemStore(item)]);
+export function ItemStore(item) {
+	return useMachine(itemMachine, { item }, c => c.item);
+}
+
+const collectionMachine = Machine(
+	{
+		id: 'collection',
+		strict: true,
+		initial: 'idle',
+		context: {
+			items: []
+		},
+		states: {
+			idle: {
+				on: {
+					add: {
+						target: 'idle',
+						actions: 'doAdd'
+					}
+				}
+			}
 		}
-	};
+	},
+	{
+		actions: {
+			doAdd: assign({
+				items: (c, e) => [...c.items, ItemStore(e.item)]
+			})
+		}
+	}
+);
+
+export function CollectionStore(items = []) {
+	return useMachine(collectionMachine, { items }, c => c.items);
 }
