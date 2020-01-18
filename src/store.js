@@ -21,25 +21,21 @@ const itemMachine = Machine({
 		}
 	}
 });
-function useMachine(machine, context) {
-	// console.log(machine.context, context, { ...machine.context, ...context });
+
+/**
+ * 
+ * @param {Machine} machine XState machine
+ * @param {*} context Shallow merged with initial machine context
+ * @returns `{ store, dispatch }`
+ */
+export function useMachine(machine, context) {
 	const service = interpret(
 		machine.withContext({ ...machine.context, ...context })
 	);
 	const store = readable(machine.initialState, set => {
 		service.onTransition(state => {
-			console.log('trans', state);
 			if (undefined === state.changed || true === state.changed) {
-				// Convenience to spread all of the context properties
-				// Just don’t name a top-level context property `state`.
-				// Usage:
-				// 	$: ({ state, foo, bar } = $store);
-				if ('state' in state.context) {
-					throw new Error(
-						'`state` context property would have been overwritten'
-					);
-				}
-				set({ state, ...state.context });
+				set(state);
 			}
 		});
 		service.start();

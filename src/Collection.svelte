@@ -1,11 +1,13 @@
 <script>
 	import Item from './Item.svelte';
 
-	export let items;
-	let { store, dispatch } = items;
+	export let value;
+	let { store, dispatch } = value;
+
+	$: state = $store;
+	$: ({ items } = state.context);
 
 	// This feels kinda yucky
-	$: ({ state, items: collection } = $store);
 
 	const item = {
 		id: 123,
@@ -15,9 +17,9 @@
 
 <div>
 	<button on:click={event => dispatch('add', { item })}>Add…</button>
-	{collection.length}
+	{items.length}
 </div>
 
-{#each collection as item}
+{#each items as item (item.id)}
 	<Item value={item} />
 {/each}

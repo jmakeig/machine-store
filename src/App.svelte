@@ -5,4 +5,4 @@
 	let items = CollectionStore([]);
 </script>
 
-<Collection {items} />
+<Collection value={items} />

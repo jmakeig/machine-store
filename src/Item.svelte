@@ -1,8 +1,9 @@
 <script>
-	export let value;
+	export let value; // {store, dispatch}
 
 	let { store, dispatch } = value;
-	$: ({ state, item } = $store);
+	$: state = $store; // XState.State
+	$: ({ item } = state.context); // any
 </script>
 
 <style>
