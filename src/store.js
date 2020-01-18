@@ -21,7 +21,7 @@ const itemMachine = Machine({
 		}
 	}
 });
-function useMachine(machine, context, selector = c => c) {
+function useMachine(machine, context) {
 	// console.log(machine.context, context, { ...machine.context, ...context });
 	const service = interpret(
 		machine.withContext({ ...machine.context, ...context })
@@ -30,7 +30,16 @@ function useMachine(machine, context, selector = c => c) {
 		service.onTransition(state => {
 			console.log('trans', state);
 			if (undefined === state.changed || true === state.changed) {
-				set({ state, context: selector(state.context) });
+				// Convenience to spread all of the context properties
+				// Just don’t name a top-level context property `state`.
+				// Usage:
+				// 	$: ({ state, foo, bar } = $store);
+				if ('state' in state.context) {
+					throw new Error(
+						'`state` context property would have been overwritten'
+					);
+				}
+				set({ state, ...state.context });
 			}
 		});
 		service.start();
@@ -68,12 +77,12 @@ const collectionMachine = Machine(
 	{
 		actions: {
 			doAdd: assign({
-				items: (c, e) => [...c.items, ItemStore(e.item)]
+				items: (c, e) => [ItemStore(e.item), ...c.items]
 			})
 		}
 	}
 );
 
 export function CollectionStore(items = []) {
-	return useMachine(collectionMachine, { items }, c => c.items);
+	return useMachine(collectionMachine, { items });
 }

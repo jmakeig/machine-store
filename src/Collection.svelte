@@ -5,7 +5,7 @@
 	let { store, dispatch } = items;
 
 	// This feels kinda yucky
-	$: ({ state, context: collection } = $store);
+	$: ({ state, items: collection } = $store);
 
 	const item = {
 		id: 123,

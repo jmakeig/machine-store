@@ -2,7 +2,7 @@
 	export let value;
 
 	let { store, dispatch } = value;
-	$: ({ state, context: item } = $store);
+	$: ({ state, item } = $store);
 </script>
 
 <style>
