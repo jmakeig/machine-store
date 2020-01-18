@@ -1,7 +1,5 @@
-import { readable } from 'svelte/store';
+import { writable, readable } from 'svelte/store';
 import { Machine, interpret } from 'xstate';
-
-export function CollectionStore() {}
 
 const machine = Machine({
 	id: 'item',
@@ -37,5 +35,15 @@ export function ItemStore(item) {
 	return {
 		state: store,
 		dispatch: service.send
+	};
+}
+
+export function CollectionStore() {
+	const store = writable([]);
+	return {
+		state: store,
+		add(item) {
+			store.update(items => [...items, ItemStore(item)]);
+		}
 	};
 }
