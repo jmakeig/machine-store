@@ -8,7 +8,6 @@
 <style>
 	section {
 		padding: 0.5em;
-		border: solid 0.5px #ccc;
 		margin: 1em 0;
 	}
 	section > section {
@@ -24,16 +23,20 @@
 	table {
 		width: 100%;
 		border-collapse: collapse;
-		border: solid 0.5px #ccc;
 	}
 	th,
 	td {
 		padding: 0.5em;
-		border: solid 0.5px #ccc;
 		text-align: left;
 	}
 	th {
 		background-color: #eee;
+	}
+	section,
+	table,
+	th,
+	td {
+		border: solid 0.5px #ccc;
 	}
 </style>
 
