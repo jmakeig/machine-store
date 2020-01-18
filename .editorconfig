@@ -13,6 +13,10 @@ indent_size = 2
 indent_style = tab
 indent_size = 2
 
+[*.html]
+indent_style = tab
+indent_size = 2
+
 [*.css]
 indent_style = tab
 indent_size = 2
