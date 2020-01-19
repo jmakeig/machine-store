@@ -48,24 +48,45 @@ export function useMachine(machine, context) {
 }
 
 export function ItemStore(item) {
-	return useMachine(itemMachine, { item }, c => c.item);
+	return useMachine(itemMachine, { item });
 }
 
 const collectionMachine = Machine(
 	{
 		id: 'collection',
 		strict: true,
-		initial: 'idle',
+		initial: 'noneSelected',
 		context: {
-			items: []
+			items: new Map(),
+			selected: new Set()
+		},
+		on: {
+			add: {
+				// No target. Internal transition.
+				internal: true,
+				actions: ['doAdd', (c, e) => console.log(c.items)]
+			}
 		},
 		states: {
-			idle: {
+			noneSelected: {
 				on: {
-					add: {
-						target: 'idle',
-						actions: 'doAdd'
+					select: {
+						target: 'someSelected',
+						actions: 'doSelect'
 					}
+				}
+			},
+			// Action order: exit, transition, entry
+			someSelected: {
+				on: {
+					deselect: [
+						{
+							target: 'noneSelected',
+							cond: (c, e) => true,
+							actions: ['doDeselect']
+						},
+						{ target: 'someSelected', actions: [] }
+					]
 				}
 			}
 		}
@@ -73,11 +94,38 @@ const collectionMachine = Machine(
 	{
 		actions: {
 			doAdd: assign({
-				items: (c, e) => [ItemStore(e.item), ...c.items]
+				items: (c, e) => {
+					const id = String(new Date().valueOf());
+					return c.items.set(id, ItemStore({ id, name: `Me: ${id}` }));
+				}
+			}),
+			doSelect: assign({
+				selected: (c, e) => c.selected.add(e.item.id)
+			}),
+			doDeselect: assign({
+				selected: (c, e) => c.selected.delete(e.item.id)
 			})
 		}
 	}
 );
+
+// For XState visualizer
+
+Map.prototype.toJSON = function() {
+	return Array.from(this.entries()).map(entry => `${entry[0]}: ${entry[1]}`);
+};
+
+Set.prototype.toJSON = function() {
+	return Array.from(this);
+};
+
+let counter = 0;
+function ItemStore(item) {
+	return {
+		id: new Date().valueOf(),
+		name: `Item ${++counter}`
+	};
+}
 
 export function CollectionStore(items = []) {
 	return useMachine(collectionMachine, { items });
