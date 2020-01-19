@@ -1,4 +1,4 @@
-import { writable, readable } from 'svelte/store';
+import { readable } from 'svelte/store';
 import { Machine, interpret, assign } from 'xstate';
 
 const itemMachine = Machine({
@@ -23,7 +23,7 @@ const itemMachine = Machine({
 });
 
 /**
- * 
+ *
  * @param {Machine} machine XState machine
  * @param {*} context Shallow merged with initial machine context
  * @returns `{ store, dispatch }`
