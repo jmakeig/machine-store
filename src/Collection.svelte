@@ -9,14 +9,16 @@
 
 	// This feels kinda yucky
 
-	const item = {
-		id: 123,
-		name: `First item`
+	const newItemTemplate = {
+		id: null,
+		name: null
 	};
 </script>
 
 <div>
-	<button on:click={event => dispatch('add', { item })}>Add…</button>
+	<button on:click={event => dispatch('add', { item: newItemTemplate })}>
+		Add…
+	</button>
 	{items.size}
 </div>
 
