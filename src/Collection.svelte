@@ -17,9 +17,9 @@
 
 <div>
 	<button on:click={event => dispatch('add', { item })}>Add…</button>
-	{items.length}
+	{items.size}
 </div>
 
-{#each items as item (item.id)}
+{#each [...items.values()] as item (item.id)}
 	<Item value={item} />
 {/each}

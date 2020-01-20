@@ -29,11 +29,13 @@ const itemMachine = Machine({
  * @returns `{ store, dispatch }`
  */
 export function useMachine(machine, context) {
+	// console.log({ ...machine.context, ...context });
 	const service = interpret(
 		machine.withContext({ ...machine.context, ...context })
 	);
 	const store = readable(machine.initialState, set => {
 		service.onTransition(state => {
+			console.log(state);
 			if (undefined === state.changed || true === state.changed) {
 				set(state);
 			}
@@ -47,69 +49,106 @@ export function useMachine(machine, context) {
 	};
 }
 
+export function CollectionStore(items = new Map()) {
+	return useMachine(collectionMachine, { items });
+}
 export function ItemStore(item) {
 	return useMachine(itemMachine, { item });
 }
+
+/**************************************************************/
+/* XState visualizer
+const initItems = new Map();
+// initItems.set('1', ItemStore({ id: '1', name: `Item ${1}` }));
+// initItems.set('2', ItemStore({ id: '2', name: `Item ${2}` }));
+
+const initSelected = new Set();
+// initSelected.add('2');
+// initSelected.add('1');
+
+// const initState = 'someSelected';
+const initState = 'noneSelected';
+*/
 
 const collectionMachine = Machine(
 	{
 		id: 'collection',
 		strict: true,
-		initial: 'noneSelected',
+		initial: 'noneSelected', //initState,
 		context: {
-			items: new Map(),
-			selected: new Set()
-		},
-		on: {
-			add: {
-				// No target. Internal transition.
-				internal: true,
-				actions: ['doAdd', (c, e) => console.log(c.items)]
-			}
+			items: new Map(), // initItems
+			selected: new Set() // initSelected
 		},
 		states: {
 			noneSelected: {
 				on: {
 					select: {
+						cond: ({ items }, e) => items.size > 0,
 						target: 'someSelected',
 						actions: 'doSelect'
+					},
+					add: {
+						// No target. Internal transition.
+						actions: 'doAdd'
 					}
 				}
 			},
 			// Action order: exit, transition, entry
 			someSelected: {
 				on: {
+					select: [
+						{
+							cond: ({ items }, { item }) => item && items.has(item.id),
+							target: 'someSelected',
+							actions: 'doSelect'
+						},
+						{
+							target: 'error'
+						}
+					],
 					deselect: [
 						{
+							cond: ({ selected }, { item }) =>
+								selected.size === 1 && selected.has(item.id),
 							target: 'noneSelected',
-							cond: (c, e) => true,
 							actions: ['doDeselect']
 						},
-						{ target: 'someSelected', actions: [] }
-					]
+						{ target: 'someSelected', actions: ['doDeselect'] }
+					],
+					add: {
+						// No target. Internal transition.
+						actions: 'doAdd'
+					}
 				}
-			}
+			},
+			error: {}
 		}
 	},
 	{
 		actions: {
 			doAdd: assign({
-				items: (c, e) => {
-					const id = String(new Date().valueOf());
-					return c.items.set(id, ItemStore({ id, name: `Me: ${id}` }));
+				items: ({ items }, { item }) => {
+					console.log('add');
+					// const id = String(new Date().valueOf());
+					return items.set(item.id, ItemStore(item));
 				}
 			}),
 			doSelect: assign({
-				selected: (c, e) => c.selected.add(e.item.id)
+				selected: ({ selected }, { item }) => selected.add(item.id)
 			}),
 			doDeselect: assign({
-				selected: (c, e) => c.selected.delete(e.item.id)
+				selected: ({ selected }, { item }) => {
+					if (!selected.delete(item.id)) {
+						throw new Error(item.id);
+					}
+					return selected;
+				}
 			})
 		}
 	}
 );
 
-// For XState visualizer
+/* XState visualizer
 
 Map.prototype.toJSON = function() {
 	return Array.from(this.entries()).map(entry => `${entry[0]}: ${entry[1]}`);
@@ -122,11 +161,40 @@ Set.prototype.toJSON = function() {
 let counter = 0;
 function ItemStore(item) {
 	return {
-		id: new Date().valueOf(),
-		name: `Item ${++counter}`
+		store: item
 	};
 }
+*/
 
-export function CollectionStore(items = []) {
-	return useMachine(collectionMachine, { items });
+/* Events
+
+{
+	"type": "add",
+	"item": {
+		"id": "1"
+	}
 }
+
+{
+	"type": "add",
+	"item": {
+		"id": "2"
+	}
+}
+
+{
+	"type": "select",
+	"item": {
+		"id": "1"
+	}
+}
+
+
+{
+	"type": "deselect",
+	"item": {
+		"id": "1"
+	}
+}
+
+*/
