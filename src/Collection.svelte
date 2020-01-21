@@ -1,5 +1,5 @@
 <script>
-	import Item from './Item.svelte';
+	import ItemRow from './ItemRow.svelte';
 
 	export let value;
 	let { store, dispatch } = value;
@@ -15,13 +15,32 @@
 	};
 </script>
 
+<style>
+	
+</style>
+
 <div>
 	<button on:click={event => dispatch('add', { item: newItemTemplate })}>
-		Add…
+		Add
 	</button>
+	<button on:click={event => dispatch('delete')}>Delete…</button>
 	{items.size}
 </div>
 
-{#each [...items.values()] as item (item.id)}
-	<Item value={item} />
-{/each}
+<table>
+	<thead>
+		<tr>
+			<th>
+				<input type="checkbox" />
+			</th>
+			<th>Name</th>
+			<th>Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		{#each [...items.values()] as item, i (item.id)}
+			<!-- <pre>{Object.keys(item).join(', ')}</pre> -->
+			<ItemRow value={item} />
+		{/each}
+	</tbody>
+</table>
