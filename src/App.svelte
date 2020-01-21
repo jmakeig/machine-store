@@ -6,3 +6,5 @@
 </script>
 
 <Collection value={items} />
+
+<svelte:window on:error={event => alert(event.message)} />
