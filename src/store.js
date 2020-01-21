@@ -28,14 +28,14 @@ const itemMachine = Machine({
  * @param {*} context Shallow merged with initial machine context
  * @returns `{ store, dispatch }`
  */
-export function useMachine(machine, context) {
+export function useMachine(machine, context = {}) {
 	// console.log({ ...machine.context, ...context });
 	const service = interpret(
 		machine.withContext({ ...machine.context, ...context })
 	);
 	const store = readable(machine.initialState, set => {
 		service.onTransition(state => {
-			console.log(state);
+			// console.log(state);
 			if (undefined === state.changed || true === state.changed) {
 				set(state);
 			}
@@ -70,6 +70,13 @@ const initSelected = new Set();
 const initState = 'noneSelected';
 */
 
+const add = {
+	add: {
+		cond: ({ items }, event) => !items.has(null),
+		actions: 'doAdd'
+	}
+};
+
 const collectionMachine = Machine(
 	{
 		id: 'collection',
@@ -87,10 +94,7 @@ const collectionMachine = Machine(
 						target: 'someSelected',
 						actions: 'doSelect'
 					},
-					add: {
-						// No target. Internal transition.
-						actions: 'doAdd'
-					}
+					...add
 				}
 			},
 			// Action order: exit, transition, entry
@@ -115,10 +119,7 @@ const collectionMachine = Machine(
 						},
 						{ target: 'someSelected', actions: ['doDeselect'] }
 					],
-					add: {
-						// No target. Internal transition.
-						actions: 'doAdd'
-					}
+					...add
 				}
 			},
 			error: {}
@@ -128,7 +129,6 @@ const collectionMachine = Machine(
 		actions: {
 			doAdd: assign({
 				items: ({ items }, { item }) => {
-					console.log('add');
 					// const id = String(new Date().valueOf());
 					return items.set(item.id, ItemStore(item));
 				}
