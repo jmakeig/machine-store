@@ -28,6 +28,8 @@
 			</th>
 			<th>Name</th>
 			<th>Description</th>
+			<th>State</th>
+			<th>Events</th>
 		</tr>
 	</thead>
 	<tbody>

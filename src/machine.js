@@ -1,5 +1,7 @@
 import { Machine, assign, spawn } from 'xstate';
 
+const log = (c, e) => console.log(e, c);
+
 export const itemMachine = Machine({
 	id: 'item',
 	strict: true,
@@ -26,7 +28,12 @@ export const itemMachine = Machine({
 			}),
 			on: {
 				change: {
-					actions: assign({ item: (c, e) => ({ item: e.item }) })
+					actions: [
+						log,
+						assign({
+							item: (c, e) => e.item
+						})
+					]
 				},
 				cancel: {
 					target: 'viewing',
