@@ -1,15 +1,13 @@
 <script>
-	export let value; // {store, dispatch}
-
-	let { store, dispatch } = value;
-	$: state = $store; // XState.State
-	$: ({ item } = state.context); // any
+	import { useService } from './store.js';
+	export let ref; // Service
+	let { store, dispatch } = useService(ref);
 </script>
 
 <tr>
 	<td>
 		<input type="checkbox" />
 	</td>
-	<td>{item.name}</td>
-	<td>{item.description}</td>
+	<td>{$store.context.item.name}</td>
+	<td>{$store.context.item.description}</td>
 </tr>

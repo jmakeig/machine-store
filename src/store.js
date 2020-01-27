@@ -1,26 +1,83 @@
 import { readable } from 'svelte/store';
 import { Machine, interpret, assign } from 'xstate';
 
-const itemMachine = Machine({
-	id: 'item',
-	strict: true,
+/*
+// https://github.com/davidkpiano/xstate/issues/423
+const coreItemMachine = {
 	initial: 'unselected',
-	context: {
-		item: null
-	},
 	states: {
 		unselected: {
 			on: {
-				select: 'selected'
+				select: {
+					target: 'selected'
+				}
 			}
 		},
 		selected: {
 			on: {
-				blur: 'unselected'
+				blur: {
+					target: 'unselected'
+				}
+			},
+			initial: 'viewing',
+			states: {
+				viewing: {
+					on: {
+						edit: {
+							target: 'editing'
+						}
+					}
+				},
+				editing: {
+					initial: 'clean',
+					states: {
+						clean: {
+							on: {
+								change: {
+									target: 'dirty'
+								}
+							}
+						},
+						dirty: {
+							on: {
+								change: {},
+								cancel: {
+									target: 'clean'
+								},
+								save: {}
+							},
+							states: {
+								saving: {
+									on: {
+										error: {},
+										done: {
+											target: '#item.persisted.selected.editing.clean'
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
+};
+
+const itemMachine = Machine({
+	id: 'item',
+	strict: true,
+	context: {
+		item: null
+	},
+	initial: 'persisted',
+	states: {
+		persisted: coreItemMachine,
+		new: coreItemMachine,
+		deleted: {}
+	}
 });
+*/
 
 /**
  *
@@ -36,7 +93,7 @@ export function useMachine(machine, context = {}) {
 	const store = readable(machine.initialState, set => {
 		service.onTransition(state => {
 			// console.log(state);
-			if (undefined === state.changed || true === state.changed) {
+			if (false !== state.changed) {
 				set(state);
 			}
 		});
@@ -49,12 +106,37 @@ export function useMachine(machine, context = {}) {
 	};
 }
 
+/**
+ * Subscribe to an existing service. There’s not affordance for 
+ * setting the initial context becuase it’s assumed that the parent
+ * service does that. For exmaple,
+ * 
+ *    spawn(childMachine.withContext({ … }))
+ *
+ * @param {Machine} service
+ */
+export function useService(service) {
+	const store = readable(service.state || service.initialState, set => {
+		const { unsubscribe } = service.onTransition(state => {
+			if (state.changed !== false) {
+				set(state);
+			}
+		});
+		return unsubscribe;
+	});
+	return {
+		store,
+		dispatch: service.send
+	};
+}
+/*
 export function CollectionStore(items = new Map()) {
 	return useMachine(collectionMachine, { items });
 }
 export function ItemStore(item) {
 	return useMachine(itemMachine, { item });
 }
+*/
 
 /**************************************************************/
 /* XState visualizer

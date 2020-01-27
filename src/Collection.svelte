@@ -1,31 +1,24 @@
 <script>
+	import { useMachine } from './store.js';
+	import { itemsMachine as machine } from './machine.js';
 	import ItemRow from './ItemRow.svelte';
 
-	export let value;
-	let { store, dispatch } = value;
-
-	$: state = $store;
-	$: ({ items } = state.context);
-
-	// This feels kinda yucky
-
-	const newItemTemplate = {
-		id: null,
-		name: null
-	};
+	export let items;
+	let { store, dispatch } = useMachine(machine, { items });
+	$: state = $store; // XState.State
 </script>
 
 <style>
-	
+
 </style>
 
-<div>
+<!-- <div>
 	<button on:click={event => dispatch('add', { item: newItemTemplate })}>
 		Add
 	</button>
 	<button on:click={event => dispatch('delete')}>Delete…</button>
 	{items.size}
-</div>
+</div> -->
 
 <table>
 	<thead>
@@ -38,9 +31,8 @@
 		</tr>
 	</thead>
 	<tbody>
-		{#each [...items.values()] as item, i (item.id)}
-			<!-- <pre>{Object.keys(item).join(', ')}</pre> -->
-			<ItemRow value={item} />
+		{#each [...state.context.refs.entries()] as [id, ref], i (id)}
+			<ItemRow {ref} />
 		{/each}
 	</tbody>
 </table>

@@ -1,10 +1,10 @@
 <script>
 	import Collection from './Collection.svelte';
-	import { CollectionStore } from './store.js';
+	// import { CollectionStore } from './store.js';
 
-	let items = CollectionStore();
+	let items = [{ id: '1', name: 'Uno' }, { id: '2', name: 'Dos' }];
 </script>
 
-<Collection value={items} />
+<Collection {items} />
 
 <svelte:window on:error={event => alert(event.message)} />
