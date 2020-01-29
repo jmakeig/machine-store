@@ -101,16 +101,16 @@ export function useMachine(machine, context = {}) {
 		return () => service.stop();
 	});
 	return {
-		store,
+		state: store,
 		dispatch: service.send
 	};
 }
 
 /**
- * Subscribe to an existing service. There’s not affordance for 
+ * Subscribe to an existing service. There’s not affordance for
  * setting the initial context becuase it’s assumed that the parent
  * service does that. For exmaple,
- * 
+ *
  *    spawn(childMachine.withContext({ … }))
  *
  * @param {Machine} service
@@ -125,7 +125,7 @@ export function useService(service) {
 		return unsubscribe;
 	});
 	return {
-		store,
+		state: store,
 		dispatch: service.send
 	};
 }

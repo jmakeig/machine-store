@@ -4,8 +4,8 @@
 	import ItemRow from './ItemRow.svelte';
 
 	export let items;
-	let { store, dispatch } = useMachine(machine, { items });
-	$: state = $store; // XState.State
+	let { state, dispatch } = useMachine(machine, { items });
+	$: items = $state.context.refs;
 </script>
 
 <style>
@@ -19,12 +19,13 @@
 	<button on:click={event => dispatch('delete')}>Delete…</button>
 	{items.size}
 </div> -->
-
+{$state.value}
 <table>
 	<thead>
 		<tr>
 			<th>
 				<input type="checkbox" />
+				{items.size} items
 			</th>
 			<th>Name</th>
 			<th>Description</th>
@@ -33,7 +34,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		{#each [...state.context.refs.entries()] as [id, ref], i (id)}
+		{#each [...items.entries()] as [id, ref], i (id)}
 			<ItemRow {ref} />
 		{/each}
 	</tbody>
