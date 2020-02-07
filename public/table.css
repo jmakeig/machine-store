@@ -1,0 +1,34 @@
+table {
+	width: 100%;
+	margin: 1em 0;
+
+	table-layout: fixed; /* Relies on first row for sizing */
+	border-spacing: 0;
+	/* https://css-tricks.com/position-sticky-and-table-headers/#comment-1749745 */
+	border-collapse: separate;
+}
+thead th {
+	position: sticky;
+	top: -1px;
+
+	border-color: #ccc;
+
+	background: #eee;
+}
+th,
+td {
+	padding: 0.5em 0.75em;
+
+	border: solid 0.5px #eee;
+	border-style: none solid solid none;
+
+	text-align: left;
+}
+th:first-child,
+td:first-child {
+	border-top-style: solid;
+	border-left-style: solid;
+}
+tbody th {
+	font: inherit;
+}

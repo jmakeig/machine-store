@@ -57,7 +57,7 @@
 </script>
 
 <!-- <Collection {items} /> -->
-
+<h1>Customer</h1>
 <EntityEditor {properties} />
 
 <svelte:window on:error={event => alert(event.message)} />

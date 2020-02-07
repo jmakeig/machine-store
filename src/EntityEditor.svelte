@@ -1,73 +1,67 @@
 <script>
+	import PropertyEditor from './PropertyEditor.svelte';
 	export let properties;
 
 	function dispatch(event, data) {
 		console.log(event, data);
 	}
 
-	function* traverse(tree, level = 0) {
+  /**
+	 * Flattens a hierarchical tree into a flat iterable, tracking levels 
+	 * of each item via its `ancestors` `Array`. Traverses depth first.
+	 * 
+	 * @param tree
+	 * @param ancestors
+	 */
+	function* flatten(tree, ancestors = []) {
 		if (undefined === tree) return;
 		for (const property of tree) {
-			yield { property, level };
-			yield* traverse(item.properties, level + 1);
+			yield { property, ancestors };
+			yield* flatten(property.properties, [...ancestors, property.name]);
 		}
+	}
+
+	function handleRowClick(event) {
+		console.log(this);
 	}
 </script>
 
 <style>
-	table {
-		width: 100%;
-		border-collapse: collapse;
+	thead .select,
+	thead .cardinality {
+		width: 4em;
+		text-align: center;
 	}
-	th,
-	td {
-		padding: 0.5em;
-		text-align: left;
-		border-bottom: solid 0.5px #ccc;
+	thead .type {
+		width: 16em;
 	}
-	tbody th {
-		font: inherit;
+	thead .actions {
+		width: 12em;
 	}
 </style>
+
+<svelte:head>
+	<link rel="stylesheet" href="/table.css" />
+</svelte:head>
 
 <table>
 	<thead>
 		<tr>
-			<th scope="col" />
-			<th scope="col">
-				<!--Type icon-->
+			<th scope="col" class="select">
+				<input type="checkbox" />
 			</th>
-			<th scope="col">Label</th>
-			<th scope="col">Name</th>
-			<th scope="col">Type</th>
-			<th scope="col">Cardinality</th>
-			<th scope="col" />
+			<th scope="col" class="label">Label</th>
+			<th scope="col" class="name">Name</th>
+			<th scope="col" class="type">Type</th>
+			<th scope="col" class="cardinality" title="Cardinality">[ ]</th>
+			<th scope="col" class="actions" />
 		</tr>
 	</thead>
 	<tbody>
-		{#each Array.from(traverse(properties)) as { property, level }}
-			<tr>
-				<td>
-					<input type="checkbox" />
-				</td>
-				<td>{level}</td>
-				<th scope="row">
-					<span style="margin-left: {level * 1.25}em;">{property.label}</span>
-				</th>
-				<td>{property.name}</td>
-				<td>{property.type}</td>
-				<td>
-					<input type="checkbox" />
-				</td>
-				<td>
-					<button
-						title="Delete this property"
-						on:click={event => dispatch('delete', property.id)}>
-						Delete
-					</button>
-					<button title="Add new property below">Add</button>
-				</td>
-			</tr>
+		{#each Array.from(flatten(properties)) as { property, ancestors }}
+			<PropertyEditor {property} level={ancestors.length} />
+		{:else}
+			<p>Nope!</p>
 		{/each}
 	</tbody>
 </table>
