@@ -1,6 +1,55 @@
 <script>
-	export let property;
+	import { Machine, assign } from 'xstate';
+	import { useMachine } from './store.js';
+
+	export let value;
 	export let level;
+
+	const machine = Machine({
+		id: 'property',
+		strict: true,
+		context: {
+			property: null,
+			cache: null
+		},
+		initial: 'viewing',
+		on: {
+			delete: {}
+		},
+		states: {
+			viewing: {
+				on: {
+					edit: {
+						target: 'editing'
+						// actions: 'focusInput'
+					}
+				}
+			},
+			editing: {
+				onEntry: assign({
+					cache: (c, e) => ({ ...c.item })
+				}),
+				on: {
+					change: {
+						actions: [
+							assign({
+								item: (c, e) => e.item
+							})
+						]
+					},
+					cancel: {
+						target: 'viewing',
+						actions: assign({
+							item: (c, e) => ({ ...c.cache })
+						})
+					}
+				}
+			}
+		}
+	});
+
+	let { state, dispatch } = useMachine(machine, { property: value });
+	$: ({ property } = $state.context); // any
 </script>
 
 <style>

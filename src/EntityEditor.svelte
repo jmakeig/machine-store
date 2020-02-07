@@ -6,10 +6,10 @@
 		console.log(event, data);
 	}
 
-  /**
-	 * Flattens a hierarchical tree into a flat iterable, tracking levels 
+	/**
+	 * Flattens a hierarchical tree into a flat iterable, tracking levels
 	 * of each item via its `ancestors` `Array`. Traverses depth first.
-	 * 
+	 *
 	 * @param tree
 	 * @param ancestors
 	 */
@@ -59,7 +59,7 @@
 	</thead>
 	<tbody>
 		{#each Array.from(flatten(properties)) as { property, ancestors }}
-			<PropertyEditor {property} level={ancestors.length} />
+			<PropertyEditor value={property} level={ancestors.length} />
 		{:else}
 			<p>Nope!</p>
 		{/each}
