@@ -27,6 +27,9 @@
 </script>
 
 <style>
+	thead .index {
+		width: 2em;
+	}
 	thead .select,
 	thead .cardinality {
 		width: 4em;
@@ -47,6 +50,7 @@
 <table>
 	<thead>
 		<tr>
+			<th scope="col" class="index">&nbsp;</th>
 			<th scope="col" class="select">
 				<input type="checkbox" />
 			</th>
@@ -54,12 +58,12 @@
 			<th scope="col" class="name">Name</th>
 			<th scope="col" class="type">Type</th>
 			<th scope="col" class="cardinality" title="Cardinality">[ ]</th>
-			<th scope="col" class="actions" />
+			<th scope="col" class="actions">&nbsp;</th>
 		</tr>
 	</thead>
 	<tbody>
-		{#each Array.from(flatten(properties)) as { property, ancestors }}
-			<PropertyEditor value={property} level={ancestors.length} />
+		{#each Array.from(flatten(properties)) as { property, ancestors }, index}
+			<PropertyEditor value={property} level={ancestors.length} {index} />
 		{:else}
 			<p>Nope!</p>
 		{/each}
