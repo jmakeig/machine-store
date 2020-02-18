@@ -1,55 +1,63 @@
 <script>
-	import { Machine, assign } from 'xstate';
+	import { tick } from 'svelte';
 	import { useMachine } from './store.js';
+	import { machine } from './PropertyMachine.js';
 
 	export let value;
 	export let level;
+	export let index;
 
-	const machine = Machine({
-		id: 'property',
-		strict: true,
-		context: {
-			property: null,
-			cache: null
-		},
-		initial: 'viewing',
-		on: {
-			delete: {}
-		},
-		states: {
-			viewing: {
-				on: {
-					edit: {
-						target: 'editing'
-						// actions: 'focusInput'
-					}
-				}
-			},
-			editing: {
-				onEntry: assign({
-					cache: (c, e) => ({ ...c.item })
-				}),
-				on: {
-					change: {
-						actions: [
-							assign({
-								item: (c, e) => e.item
-							})
-						]
-					},
-					cancel: {
-						target: 'viewing',
-						actions: assign({
-							item: (c, e) => ({ ...c.cache })
-						})
+	let labelEl;
+
+	const { status, property, dispatch } = useMachine(
+		machine,
+		{ property: value },
+		{
+			actions: {
+				focusInput: () => tick().then(() => labelEl.select())
+			}
+		}
+	);
+
+	function focus(element) {
+		function handleLeave(event) {
+			//console.log('blur', event.currentTarget, event.relatedTarget);
+			if (!element.contains(event.relatedTarget)) {
+				// console.log(event.relatedTarget);
+				dispatch('blur');
+			} else {
+				event.preventDefault();
+				event.stopPropagation();
+			}
+		}
+		function handleArrive(event) {
+			// console.log('focus', event.currentTarget, event.relatedTarget);
+			dispatch('focus');
+		}
+		function handleKeyboard(event) {
+			if (element.contains(document.activeElement)) {
+				if ('Escape' === event.key) {
+					if (document.activeElement) {
+						document.activeElement.blur(); // I’m not sure why this works
+					} else {
+						element.blur();
 					}
 				}
 			}
 		}
-	});
+		element.addEventListener('focus', handleArrive);
+		element.addEventListener('focusout', handleLeave, { capture: true });
+		element.addEventListener('keyup', handleKeyboard);
 
-	let { state, dispatch } = useMachine(machine, { property: value });
-	$: ({ property } = $state.context); // any
+		return {
+			update(params) {},
+			destroy() {
+				element.removeEventListener('focus', dispatch);
+				element.removeEventListener('focusout', handleBlur, { capture: true });
+				element.addEventListener('keyup', handleKeyboard);
+			}
+		};
+	}
 </script>
 
 <style>
@@ -90,48 +98,87 @@
 	td.name span {
 		font-family: var(--monospace);
 	}
-	/*
-	tr.property[data-level] .label,
-	tr.property[data-level] .name {
-		--level: 0;
-		padding-left: calc(1.5em * var(--level) + 0.5em);
+	tr.property:focus,
+	tr.property:focus-within {
+		outline: inherit;
+		outline-offset: -2px;
 	}
-	tr.property[data-level='1'] .label,
-	tr.property[data-level='1'] .name {
-		--level: 1;
+	.numeric {
+		text-align: right;
+		font-variant-numeric: tabular-nums;
 	}
-	*/
+
+	tr.property:focus-within {
+		outline-color: Highlight;
+		outline-style: solid;
+		outline-width: 4px;
+		border-radius: 4px;
+		/* transition: all 0.3s; */
+	}
+
+	/* WebKit gets its native focus styles. */
+	@media (-webkit-min-device-pixel-ratio: 0) {
+		tr.property:focus-within {
+			outline-color: -webkit-focus-ring-color;
+			outline-style: auto;
+		}
+	}
+	input[type='text']:read-only {
+		background: transparent;
+		border-color: orange;
+	}
 </style>
 
-<tr class="property" data-type={property.type} data-level={level}>
+<tr
+	class="property"
+	data-type={$property.type}
+	data-level={level}
+	tabindex="0"
+	use:focus>
+	<td class="index numeric">{index}</td>
 	<td class="select">
 		<input type="checkbox" />
 	</td>
 	<th class="label" scope="row">
-		<span style="margin-left: {level * 1.25}em;">{property.label}</span>
+		<span style="margin-left: {level * 1.25}em;">
+			{#if $status.matches('editing')}
+				<input
+					type="text"
+					bind:value={$property.label}
+					tabindex="0"
+					bind:this={labelEl} />
+			{:else}{$property.label}{/if}
+		</span>
 	</th>
 	<td class="name">
-		<span style="margin-left: {level * 1.25}em;">{property.name}</span>
+		<span style="margin-left: {level * 1.25}em;">{$property.name}</span>
 	</td>
-	<td class="type">{property.type}</td>
+	<td class="type">
+		{#if $status.matches('editing')}
+			<select tabindex="0">
+				<option>string</option>
+			</select>
+		{:else}{$property.type}{/if}
+	</td>
 	<td class="cardinality">
 		<input type="checkbox" />
 	</td>
 	<td class="actions">
 		<button
-			title="Edit {property.label}"
-			on:click={event => dispatch('edit', property.id)}>
+			title="Edit {$property.label}"
+			on:click={event => dispatch('edit', $property.id)}>
 			Edit
 		</button>
 		<button
-			title="Delete {property.label}"
-			on:click={event => dispatch('delete', property.id)}>
+			title="Delete {$property.label}"
+			on:click={event => dispatch('delete', $property.id)}>
 			Delete
 		</button>
 		<button
-			title="Add new property after {property.label}"
-			on:click={event => dispatch('add', property.id)}>
+			title="Add new property after {$property.label}"
+			on:click={event => dispatch('add', $property.id)}>
 			Add
 		</button>
+		<span>{$status.toStrings().pop()}</span>
 	</td>
 </tr>
