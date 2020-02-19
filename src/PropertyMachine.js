@@ -51,7 +51,7 @@ export const machine = key => {
 					},
 					on: {
 						blur: {
-							target: '../viewing',
+							target: 'viewing',
 							internal: false
 						}
 					}

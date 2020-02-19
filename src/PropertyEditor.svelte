@@ -2,6 +2,7 @@
 	import { tick } from 'svelte';
 	import { useMachine } from './store.js';
 	import { machine } from './PropertyMachine.js';
+	import camelcase from 'camelcase';
 
 	export let value;
 	export let level;
@@ -19,9 +20,18 @@
 		}
 	);
 
+	$: derivedName = camelcase($property.label);
+
+	function auto(element) {
+		element.autocomplete = 'off';
+		element.autocorrect = 'off';
+		element.autocapitalize = 'off';
+		element.spellcheck = false;
+	}
+
 	function focus(element) {
 		function handleLeave(event) {
-			//console.log('blur', event.currentTarget, event.relatedTarget);
+			// console.log('blur', event.currentTarget, event.relatedTarget);
 			if (!element.contains(event.relatedTarget)) {
 				// console.log(event.relatedTarget);
 				dispatch('blur');
@@ -50,7 +60,7 @@
 		element.addEventListener('keyup', handleKeyboard);
 
 		return {
-			update(params) {},
+			// update(params) {},
 			destroy() {
 				element.removeEventListener('focus', dispatch);
 				element.removeEventListener('focusout', handleBlur, { capture: true });
@@ -101,7 +111,7 @@
 	tr.property:focus,
 	tr.property:focus-within {
 		outline: inherit;
-		outline-offset: -2px;
+		outline-offset: -4px;
 	}
 	.numeric {
 		text-align: right;
@@ -140,23 +150,36 @@
 		<input type="checkbox" />
 	</td>
 	<th class="label" scope="row">
-		<span style="margin-left: {level * 1.25}em;">
+		<span style="margin-left: {level * 1.5}em;">
 			{#if $status.matches('editing')}
 				<input
 					type="text"
 					bind:value={$property.label}
 					tabindex="0"
-					bind:this={labelEl} />
+					bind:this={labelEl}
+					on:input={event => ($property.name = camelcase($property.label))}
+					use:auto />
 			{:else}{$property.label}{/if}
 		</span>
 	</th>
 	<td class="name">
-		<span style="margin-left: {level * 1.25}em;">{$property.name}</span>
+		<span style="margin-left: {level * 1.5}em;">
+			{#if $status.matches('editing')}
+				<input type="text" bind:value={$property.name} tabindex="0" use:auto />
+			{:else}
+				<span>{$property.name}</span>
+			{/if}
+		</span>
 	</td>
 	<td class="type">
 		{#if $status.matches('editing')}
-			<select tabindex="0">
-				<option>string</option>
+			<select tabindex="0" bind:value={$property.type}>
+				<option value="string">String</option>
+				<option value="number">Number</option>
+				<option value="date">Date</option>
+				<option value="boolean">Boolean</option>
+				<option value="object">Object</option>
+				<option value="entity">Entity</option>
 			</select>
 		{:else}{$property.type}{/if}
 	</td>
