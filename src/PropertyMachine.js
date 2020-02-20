@@ -22,11 +22,17 @@ export const machine = key => {
 			initial: 'viewing',
 			context: {},
 			states: {
+				viewing: {
+					on: {
+						focus: {
+							target: 'editing',
+							actions: 'focusInput'
+						}
+					}
+				},
 				editing: {
 					initial: 'clean',
 					entry: 'doCache',
-					exit: 'undoCache',
-					actions: 'focusInput',
 					states: {
 						clean: {
 							on: {
@@ -55,18 +61,13 @@ export const machine = key => {
 							internal: false
 						}
 					}
-				},
-				viewing: {
-					on: {
-						focus: { target: 'editing' }
-					}
 				}
 			}
 		},
 		{
 			actions: {
 				doChange: assign({
-					[CONTEXT_KEY]: (c, e) => clone({ ...e[CONTEXT_KEY], timestamp: null })
+					[CONTEXT_KEY]: (c, e) => clone({ ...e[CONTEXT_KEY] })
 				}),
 				doCache: assign({ [CACHE_KEY]: (c, e) => clone(c[CONTEXT_KEY]) }),
 				undoCache: assign({
