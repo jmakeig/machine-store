@@ -20,9 +20,7 @@
 		}
 	);
 
-	$: derivedName = camelcase($property.label);
-
-	function auto(element) {
+	function inputDefaults(element) {
 		element.autocomplete = 'off';
 		element.autocorrect = 'off';
 		element.autocapitalize = 'off';
@@ -94,12 +92,40 @@
 
 		background: green;
 	}
+	tr.property[data-type='date'] .label span:before {
+		color: #fff;
+
+		content: 'D';
+
+		background: #333;
+	}
+	tr.property[data-type='number'] .label span:before {
+		color: #fff;
+
+		content: 'N';
+
+		background: #333;
+	}
+	tr.property[data-type='boolean'] .label span:before {
+		color: #fff;
+
+		content: 'B';
+
+		background: #333;
+	}
 	tr.property[data-type='object'] .label span:before {
 		color: #fff;
 
 		content: 'O';
 
 		background: purple;
+	}
+	tr.property[data-type='entity'] .label span:before {
+		color: #fff;
+
+		content: 'E';
+
+		background: orange;
 	}
 	td.select,
 	td.cardinality {
@@ -158,14 +184,18 @@
 					tabindex="0"
 					bind:this={labelEl}
 					on:input={event => ($property.name = camelcase($property.label))}
-					use:auto />
+					use:inputDefaults />
 			{:else}{$property.label}{/if}
 		</span>
 	</th>
 	<td class="name">
 		<span style="margin-left: {level * 1.5}em;">
 			{#if $status.matches('editing')}
-				<input type="text" bind:value={$property.name} tabindex="0" use:auto />
+				<input
+					type="text"
+					bind:value={$property.name}
+					tabindex="0"
+					use:inputDefaults />
 			{:else}
 				<span>{$property.name}</span>
 			{/if}
@@ -187,11 +217,6 @@
 		<input type="checkbox" />
 	</td>
 	<td class="actions">
-		<button
-			title="Edit {$property.label}"
-			on:click={event => dispatch('edit', $property.id)}>
-			Edit
-		</button>
 		<button
 			title="Delete {$property.label}"
 			on:click={event => dispatch('delete', $property.id)}>
