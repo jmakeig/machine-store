@@ -1,10 +1,9 @@
 <script>
+	import { useMachine } from './store.js';
+	import { machine } from './EntityMachine.js';
 	import PropertyEditor from './PropertyEditor.svelte';
-	export let properties;
 
-	function dispatch(event, data) {
-		console.log(event, data);
-	}
+	export let definition;
 
 	/**
 	 * Flattens a hierarchical tree into a flat iterable, tracking levels
@@ -24,6 +23,10 @@
 	function handleRowClick(event) {
 		console.log(this);
 	}
+
+	const { status, entity, dispatch } = useMachine(machine, {
+		entity: definition
+	});
 </script>
 
 <style>
@@ -46,7 +49,7 @@
 <svelte:head>
 	<link rel="stylesheet" href="/table.css" />
 </svelte:head>
-
+<h1>{$entity.label}</h1>
 <table>
 	<thead>
 		<tr>
@@ -62,7 +65,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		{#each Array.from(flatten(properties)) as { property, ancestors }, index}
+		{#each Array.from(flatten($entity.properties)) as { property, ancestors }, index}
 			<PropertyEditor value={property} level={ancestors.length} {index} />
 		{:else}
 			<p>Nope!</p>

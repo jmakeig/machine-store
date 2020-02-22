@@ -17,7 +17,6 @@ export function useMachine(
 	if (0 === keys.length && process.env.NODE_ENV !== 'production') {
 		console.warn(`Defaulting to ${key} for context key name`);
 	}
-
 	if ('function' === typeof machine) {
 		machine = machine(key);
 	}

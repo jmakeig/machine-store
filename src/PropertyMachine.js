@@ -1,16 +1,5 @@
 import { Machine, assign } from 'xstate';
-
-// Ensure correct dirty checks when Svelte is running in immutable mode.
-function clone(object) {
-	if ('object' === typeof object) {
-		if (null === object) return object;
-		if (Array.isArray(object)) return [...object];
-		if (object instanceof Set) return new Set(object);
-		if (object instanceof Map) return new Map(object);
-		return Object.assign({}, object);
-	}
-	return object;
-}
+import { clone } from './util.js';
 
 export const machine = key => {
 	const CONTEXT_KEY = key || 'property';
