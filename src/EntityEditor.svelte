@@ -3,6 +3,8 @@
 	import { machine } from './EntityMachine.js';
 	import PropertyEditor from './PropertyEditor.svelte';
 
+	import { readable } from 'svelte/store';
+
 	export let definition;
 
 	/**
@@ -27,6 +29,9 @@
 	const { status, entity, dispatch } = useMachine(machine, {
 		entity: definition
 	});
+
+	// const entity = readable(definition);
+	// const status = readable(true);
 </script>
 
 <style>
@@ -49,26 +54,29 @@
 <svelte:head>
 	<link rel="stylesheet" href="/table.css" />
 </svelte:head>
-<h1>{$entity.label}</h1>
-<table>
-	<thead>
-		<tr>
-			<th scope="col" class="index">&nbsp;</th>
-			<th scope="col" class="select">
-				<input type="checkbox" />
-			</th>
-			<th scope="col" class="label">Label</th>
-			<th scope="col" class="name">Name</th>
-			<th scope="col" class="type">Type</th>
-			<th scope="col" class="cardinality" title="Cardinality">[ ]</th>
-			<th scope="col" class="actions">&nbsp;</th>
-		</tr>
-	</thead>
-	<tbody>
-		{#each Array.from(flatten($entity.properties)) as { property, ancestors }, index}
-			<PropertyEditor value={property} level={ancestors.length} {index} />
-		{:else}
-			<p>Nope!</p>
-		{/each}
-	</tbody>
-</table>
+<h1>{$entity.label} ({$status.toStrings().join('.')})</h1>
+
+{#if $status}
+	<table>
+		<thead>
+			<tr>
+				<th scope="col" class="index">&nbsp;</th>
+				<th scope="col" class="select">
+					<input type="checkbox" />
+				</th>
+				<th scope="col" class="label">Label</th>
+				<th scope="col" class="name">Name</th>
+				<th scope="col" class="type">Type</th>
+				<th scope="col" class="cardinality" title="Cardinality">[ ]</th>
+				<th scope="col" class="actions">&nbsp;</th>
+			</tr>
+		</thead>
+		<tbody>
+			{#each Array.from(flatten($entity.properties)) as { property, ancestors }, index}
+				<PropertyEditor ref={property} level={ancestors.length} {index} />
+			{:else}
+				<p>Nope!</p>
+			{/each}
+		</tbody>
+	</table>
+{/if}

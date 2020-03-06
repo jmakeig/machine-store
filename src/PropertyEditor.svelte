@@ -1,24 +1,22 @@
 <script>
 	import { tick } from 'svelte';
-	import { useMachine } from './store.js';
+	import { useService } from './store.js';
 	import { machine } from './PropertyMachine.js';
 	import camelcase from 'camelcase';
 
-	export let value;
+	export let ref;
 	export let level;
 	export let index;
 
+	console.dir(ref);
+
 	let labelEl;
 
-	const { status, property, dispatch } = useMachine(
-		machine,
-		{ property: value },
-		{
-			actions: {
-				focusInput: () => tick().then(() => labelEl.select())
-			}
+	const { status, property, dispatch } = useService(ref, {
+		actions: {
+			focusInput: () => tick().then(() => labelEl.select())
 		}
-	);
+	});
 
 	function inputDefaults(element) {
 		element.autocomplete = 'off';

@@ -1,25 +1,36 @@
 import { Machine, assign, spawn } from 'xstate';
-import { clone } from './util.js';
 import { machine as propertyMachine } from './PropertyMachine.js';
 
-export const machine = Machine({
-	id: 'entity',
-	strict: true,
-	context: { entity: null },
-	initial: 'initializing',
-	states: {
-		initializing: {
-			entity: assign({
-				refs: ({ entity }) => {
-					return entity.properties.map(property =>
-						spawn(propertyMachine().withContext({ property }))
-					);
+/*
+console.log(
+	propertyMachine('property').withContext({ property: { name: 'asdf' } })
+);
+*/
+
+export const machine = key =>
+	Machine({
+		id: key,
+		strict: true,
+		context: { [key]: { properties: [] } }, //
+		initial: 'initializing',
+		states: {
+			initializing: {
+				entry: assign({
+					[key]: (c, e) => ({
+						...console.log(c),
+						...c[key],
+						properties: c[key].properties.map(property =>
+							spawn(propertyMachine('property').withContext({ property }))
+						)
+					})
+				}),
+				// entry: assign({
+				// 	[key]: (c, e) => ({ ...console.log(c), ...c[key] })
+				// }),
+				on: {
+					'': { target: 'unselected' }
 				}
-			}),
-			on: {
-				'': { target: 'unselected' }
-			}
-		},
-		unselected: {}
-	}
-});
+			},
+			unselected: {}
+		}
+	});
