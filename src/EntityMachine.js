@@ -1,32 +1,53 @@
 import { Machine, assign, spawn } from 'xstate';
 import { machine as propertyMachine } from './PropertyMachine.js';
 
-/*
-console.log(
-	propertyMachine('property').withContext({ property: { name: 'asdf' } })
-);
-*/
+/**
+ * Depth-first copy with selective transformation.
+ * For each of the `Iterable` selected by the selector function, it
+ * applies the `visitor` function and continues recursively.
+ *
+ *
+ * @param {object} node the tree structure
+ * @param {function} [visitor] the function to apply to selected children
+ * @param {function} [childrenSelector] selects an `Iterable` of children
+ * @return {object}
+ */
+function transform(object, visitor = v => v, childrenSelector = p => true) {
+	const copy = Object.create(Object.getPrototypeOf(object));
+
+	for (let p in object) {
+		if (!childrenSelector(p)) {
+			copy[p] = object[p];
+		} else {
+			copy[p] = object[p].map(prop =>
+				visitor(transform(prop, visitor, childrenSelector))
+			);
+		}
+	}
+	return copy;
+}
 
 export const machine = key =>
 	Machine({
 		id: key,
 		strict: true,
-		context: { [key]: { properties: [] } }, //
+		context: { [key]: { properties: [] } }, // FIXME: Why do I have to creaet a dummy context?
 		initial: 'initializing',
 		states: {
 			initializing: {
 				entry: assign({
-					[key]: (c, e) => ({
-						...console.log(c),
-						...c[key],
-						properties: c[key].properties.map(property =>
-							spawn(propertyMachine('property').withContext({ property }))
+					[key]: (c, e) =>
+						transform(
+							c[key],
+							property => {
+								// console.log(property);
+								return spawn(
+									propertyMachine('property').withContext({ property })
+								);
+							},
+							p => 'properties' === p
 						)
-					})
 				}),
-				// entry: assign({
-				// 	[key]: (c, e) => ({ ...console.log(c), ...c[key] })
-				// }),
 				on: {
 					'': { target: 'unselected' }
 				}

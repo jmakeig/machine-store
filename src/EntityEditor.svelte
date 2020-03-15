@@ -3,7 +3,7 @@
 	import { machine } from './EntityMachine.js';
 	import PropertyEditor from './PropertyEditor.svelte';
 
-	import { readable } from 'svelte/store';
+	// import { readable } from 'svelte/store';
 
 	export let definition;
 
@@ -17,8 +17,9 @@
 	function* flatten(tree, ancestors = []) {
 		if (undefined === tree) return;
 		for (const property of tree) {
+			const context = property.state.context.property;
 			yield { property, ancestors };
-			yield* flatten(property.properties, [...ancestors, property.name]);
+			yield* flatten(context.properties, [...ancestors, context.name]);
 		}
 	}
 
