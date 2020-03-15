@@ -3,6 +3,7 @@ import { interpret } from 'xstate';
 
 const defaultEventCreator = () => ({ type: 'change' });
 
+// FIXME: This implementation is incomplete
 export function useService(service) {
 	const status = readable(service.initialState, set => {
 		service.onTransition(state => {
@@ -25,6 +26,13 @@ export function useService(service) {
 	};
 }
 
+/**
+ *
+ * @param {StateMachine|function} machine a machine instance or a function that, given a key parameter, creates a machine
+ * @param {*} initialContext a single-property object whose property name determines the primary context key, defaults to `'item'` and warns when not in a production environment
+ * @param {*} additionalConfig additional config sent to `.withConfig()`
+ * @param {*} [eventCreator = () => ({ type: 'change' })] a function that creates the event that’s fired with the `context[key]` is updated
+ */
 export function useMachine(
 	machine,
 	initialContext = {},
