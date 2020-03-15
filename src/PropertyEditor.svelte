@@ -161,15 +161,19 @@
 		background: transparent;
 		border-color: orange;
 	}
+	.name input[type='text'] {
+		font-family: var(--monosapce);
+	}
 </style>
 
 <tr
 	class="property"
+	data-id={$property.id}
 	data-type={$property.type}
 	data-level={level}
 	tabindex="0"
 	use:focus>
-	<td class="index numeric">{index}</td>
+	<!-- <td class="index numeric">{index}</td> -->
 	<td class="select">
 		<input type="checkbox" />
 	</td>

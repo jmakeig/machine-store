@@ -9,46 +9,54 @@
 	});
 
 	const entity = {
+		id: 'CUSTOMER',
 		label: 'Customer',
 		name: 'customer',
 		properties: [
 			{
+				id: 'A',
 				label: 'Given Name',
 				name: 'givenName',
 				type: 'string',
 				cardinality: Cardinality.one
 			},
 			{
+				id: 'B',
 				label: 'Family Name',
 				name: 'familyName',
 				type: 'string',
 				cardinality: Cardinality.one
 			},
 			{
+				id: 'C',
 				label: 'Shipping Address',
 				name: 'shippingAddress',
 				type: 'object',
 				cardinality: Cardinality.one,
 				properties: [
 					{
+						id: 'D',
 						label: 'Street Address',
 						name: 'address',
 						type: 'string',
 						cardinality: Cardinality.one
 					},
 					{
+						id: 'E',
 						label: 'City',
 						name: 'city',
 						type: 'string',
 						cardinality: Cardinality.one
 					},
 					{
+						id: 'F',
 						label: 'State',
 						name: 'state',
 						type: 'string',
 						cardinality: Cardinality.one
 					},
 					{
+						id: 'G',
 						label: 'ZIP Code',
 						name: 'zip',
 						type: 'string',

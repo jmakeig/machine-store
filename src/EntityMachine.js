@@ -10,7 +10,7 @@ import { machine as propertyMachine } from './PropertyMachine.js';
  * @param {object} node the tree structure
  * @param {function} [visitor] the function to apply to selected children
  * @param {function} [childrenSelector] selects an `Iterable` of children
- * @return {object}
+ * @return {object} the new tree
  */
 function transform(object, visitor = v => v, childrenSelector = p => true) {
 	const copy = Object.create(Object.getPrototypeOf(object));
@@ -42,7 +42,8 @@ export const machine = key =>
 							property => {
 								// console.log(property);
 								return spawn(
-									propertyMachine('property').withContext({ property })
+									propertyMachine('property').withContext({ property }),
+									property.id
 								);
 							},
 							p => 'properties' === p
@@ -52,6 +53,11 @@ export const machine = key =>
 					'': { target: 'unselected' }
 				}
 			},
-			unselected: {}
+			unselected: {
+				on: {
+					select: { target: 'selected' }
+				}
+			},
+			selected: {}
 		}
 	});

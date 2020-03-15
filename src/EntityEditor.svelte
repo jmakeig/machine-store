@@ -58,26 +58,28 @@
 <h1>{$entity.label} ({$status.toStrings().join('.')})</h1>
 
 {#if $status}
-	<table>
-		<thead>
-			<tr>
-				<th scope="col" class="index">&nbsp;</th>
-				<th scope="col" class="select">
-					<input type="checkbox" />
-				</th>
-				<th scope="col" class="label">Label</th>
-				<th scope="col" class="name">Name</th>
-				<th scope="col" class="type">Type</th>
-				<th scope="col" class="cardinality" title="Cardinality">[ ]</th>
-				<th scope="col" class="actions">&nbsp;</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each Array.from(flatten($entity.properties)) as { property, ancestors }, index}
-				<PropertyEditor ref={property} level={ancestors.length} {index} />
-			{:else}
-				<p>Nope!</p>
-			{/each}
-		</tbody>
-	</table>
+	<article class="table">
+		<table>
+			<thead>
+				<tr>
+					<!-- <th scope="col" class="index">&nbsp;</th> -->
+					<th scope="col" class="select">
+						<input type="checkbox" />
+					</th>
+					<th scope="col" class="label">Label</th>
+					<th scope="col" class="name">Name</th>
+					<th scope="col" class="type">Type</th>
+					<th scope="col" class="cardinality" title="Cardinality">Many?</th>
+					<th scope="col" class="actions">&nbsp;</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each Array.from(flatten($entity.properties)) as { property, ancestors }, index}
+					<PropertyEditor ref={property} level={ancestors.length} {index} />
+				{:else}
+					<p>Nope!</p>
+				{/each}
+			</tbody>
+		</table>
+	</article>
 {/if}
