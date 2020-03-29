@@ -1,7 +1,7 @@
 import { Machine, assign } from 'xstate';
 import { clone } from './util.js';
 
-export const machine = key => {
+export const machine = (key, additionalConfig = {}) => {
 	const CONTEXT_KEY = key || 'property';
 	const CACHE_KEY = `${CONTEXT_KEY}_cache`;
 	return Machine(
@@ -54,6 +54,7 @@ export const machine = key => {
 			}
 		},
 		{
+			...additionalConfig,
 			actions: {
 				doChange: assign({
 					[CONTEXT_KEY]: (c, e) => clone({ ...e[CONTEXT_KEY] })

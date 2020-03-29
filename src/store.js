@@ -4,7 +4,13 @@ import { interpret } from 'xstate';
 const defaultEventCreator = () => ({ type: 'change' });
 
 // FIXME: This implementation is incomplete
-export function useService(service) {
+export function useService(
+	service,
+	additionalConfig,
+	eventCreator = defaultEventCreator
+) {
+	console.log(service);
+	service = service.withConfig(additionalConfig);
 	const status = readable(service.initialState, set => {
 		service.onTransition(state => {
 			if (false !== state.changed) {

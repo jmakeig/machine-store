@@ -27,7 +27,7 @@ function transform(object, visitor = v => v, childrenSelector = p => true) {
 	return copy;
 }
 
-export const machine = key =>
+export const machine = (key, additionalConfig = {}) =>
 	Machine({
 		id: key,
 		strict: true,
@@ -42,7 +42,9 @@ export const machine = key =>
 							property => {
 								// console.log(property);
 								return spawn(
-									propertyMachine('property').withContext({ property }),
+									propertyMachine('property')
+										.withConfig(additionalConfig)
+										.withContext({ property }),
 									property.id
 								);
 							},
